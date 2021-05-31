@@ -1,4 +1,3 @@
---file = nil
 -- function LuaExportStart()
 	
 	--file = io.open(lfs.writedir() .. [[Logs\DCS-SA342FM-Radio.log]], "w")
@@ -16,7 +15,11 @@ function getChnlPosition(_args, _step) -- Function courtesy of SRS Export
     return _num
 end
 
-function changeOnScreenFreq(_value, _append)
+function getButtonPosition(_args)
+	return GetDevice(0):get_argument_value(_args)
+end
+
+function changeOnScreenFreq(_value, _append) -- _value = string (integers), _append = true/false
 	if button_down == false then -- Rapid input without tracking the button state
 		if _append == false then
 			onscreen_Freq = _value
@@ -64,29 +67,33 @@ function LuaExportAfterNextFrame()
 			FMFreq:set(tonumber(string.format("%0.3f", tonumber(onscreen_Freq)/1000))) -- For input
 		end
 		GetDevice(28):set_frequency(FM_Preset[CHNL]) -- Set the actual freq for DCS to give to SRS and soforth
-		if GetDevice(0):get_argument_value(278) > 0.5 then -- BTN_X
-			changeOnScreenFreq("00000", false) -- Reset frequency on-screen
-		elseif GetDevice(0):get_argument_value(277) > 0.5 then -- BTN_0
+		if getButtonPosition(278) > 0.5 then -- BTN_X; Creature feature, enables user to backtrack instead of re-entering the entire freq.
+			if button_down == false then
+				onscreen_Freq = string.sub(onscreen_Freq, 1, -2) -- Remove last digit; repeatedly pushing this will remove each subsequent digit
+				validated = false -- Dirty frequency
+				button_down = true
+			end
+		elseif getButtonPosition(277) > 0.5 then -- BTN_0
 			changeOnScreenFreq("0", true)
-		elseif GetDevice(0):get_argument_value(284) > 0.5 then -- BTN_1
+		elseif getButtonPosition(284) > 0.5 then -- BTN_1
 			changeOnScreenFreq("1", true)
-		elseif GetDevice(0):get_argument_value(285) > 0.5 then -- BTN_2
+		elseif getButtonPosition(285) > 0.5 then -- BTN_2
 			changeOnScreenFreq("2", true)
-		elseif GetDevice(0):get_argument_value(286) > 0.5 then -- BTN_3
+		elseif getButtonPosition(286) > 0.5 then -- BTN_3
 			changeOnScreenFreq("3", true)
-		elseif GetDevice(0):get_argument_value(279) > 0.5 then -- BTN_4
+		elseif getButtonPosition(279) > 0.5 then -- BTN_4
 			changeOnScreenFreq("4", true)
-		elseif GetDevice(0):get_argument_value(280) > 0.5 then -- BTN_5
+		elseif getButtonPosition(280) > 0.5 then -- BTN_5
 			changeOnScreenFreq("5", true)
-		elseif GetDevice(0):get_argument_value(281) > 0.5 then -- BTN_6
+		elseif getButtonPosition(281) > 0.5 then -- BTN_6
 			changeOnScreenFreq("6", true)
-		elseif GetDevice(0):get_argument_value(274) > 0.5 then -- BTN_7
+		elseif getButtonPosition(274) > 0.5 then -- BTN_7
 			changeOnScreenFreq("7", true)
-		elseif GetDevice(0):get_argument_value(275) > 0.5 then -- BTN_8
+		elseif getButtonPosition(275) > 0.5 then -- BTN_8
 			changeOnScreenFreq("8", true)
-		elseif GetDevice(0):get_argument_value(276) > 0.5 then -- BTN_9
+		elseif getButtonPosition(276) > 0.5 then -- BTN_9
 			changeOnScreenFreq("9", true)
-		elseif GetDevice(0):get_argument_value(287) > 0.5 then -- BTN_VAL
+		elseif getButtonPosition(287) > 0.5 then -- BTN_VAL
 			if button_down == false then
 				-- min = 30E6, max = 87.975E6
 				if (tonumber(onscreen_Freq)*1000 >= 30E6 and tonumber(onscreen_Freq)*1000 <= 87.975E6 and tonumber(onscreen_Freq) % 25 == 0) then -- Check operating range and modulo of 25
