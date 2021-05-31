@@ -1,0 +1,1 @@
+pcall(function() local SA342FMlfs=require('lfs');dofile(SA342FMlfs.writedir()..[[Mods\Services\SA342FM\Scripts\FM-Controller.lua]]); end,nil);
